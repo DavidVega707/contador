@@ -117,7 +117,7 @@
         <div class="controls">
             <label for="maxChars">Caracteres por línea:</label>
             <input type="number" id="maxChars" value="31" min="1">
-            <label><input type="checkbox" id="countShort" checked> Ignorar líneas cortas como completas</label>
+            <label><input type="checkbox" id="countShort" checked> Contar líneas cortas como adicionales</label>
         </div>
         <div class="buttons">
             <button onclick="formatText()">Formatear Texto</button>
@@ -126,6 +126,7 @@
         <div class="counts">
             <span id="totalLinesText">Líneas Totales: 0</span>
             <span id="additionalLinesText">Líneas Adicionales: 0</span>
+            <span id="combinedLinesText">Líneas Combinadas: 0</span>
         </div>
         <h2>Texto Formateado:</h2>
         <div id="outputText" class="output-container"></div>
@@ -159,7 +160,7 @@
                 const trimmed = lineText.trim();
                 if (trimmed.length > 0) {
                     const isShort = trimmed.length < minToCount;
-                    if (!countShort && isShort) {
+                    if (countShort && isShort) {
                         additionalChars.push(trimmed.length);
                         appendLine(lineText, '');
                     } else {
@@ -228,9 +229,12 @@
         }
 
         function updateCounts(counted, additional) {
+            const combined = counted + additional;
             document.getElementById('totalLinesText').innerText = `Líneas Totales: ${counted}`;
             document.getElementById('additionalLinesText').innerText = `Líneas Adicionales: ${additional}`;
+            document.getElementById('combinedLinesText').innerText = `Líneas Combinadas: ${combined}`;
         }
     </script>
 </body>
 </html>
+
