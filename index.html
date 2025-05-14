@@ -49,6 +49,7 @@
         }
         .buttons {
             display: flex;
+            flex-wrap: wrap;
             justify-content: space-between;
             gap: 10px;
             margin-bottom: 15px;
@@ -63,6 +64,7 @@
             font-size: 1em;
             transition: background-color 0.3s ease;
             flex: 1;
+            min-width: 150px;
         }
         button:hover {
             background-color: #0056b3;
@@ -99,7 +101,7 @@
         }
         .line-text {
             text-align: justify;
-            word-break: break-all;
+            word-break: break-word;
             flex-grow: 1;
         }
         .footer {
@@ -113,7 +115,7 @@
 <body>
     <div class="container">
         <h1>Estandarizador de Texto Avanzado</h1>
-        <textarea id="inputText" placeholder="Introduce tu texto aquí..."></textarea>
+        <textarea id="inputText" placeholder="Ingresar texto o pegar del portapapeles..."></textarea>
         <div class="controls">
             <label for="maxChars">Caracteres por línea:</label>
             <input type="number" id="maxChars" value="31" min="1">
@@ -122,6 +124,7 @@
         <div class="buttons">
             <button onclick="formatText()">Formatear Texto</button>
             <button onclick="calculateAdditional()">Calcular Líneas Adicionales</button>
+            <button id="pegarBtn">Pegar del Portapapeles</button>
         </div>
         <div class="counts">
             <span id="totalLinesText">Líneas Totales: 0</span>
@@ -234,7 +237,23 @@
             document.getElementById('additionalLinesText').innerText = `Líneas Adicionales: ${additional}`;
             document.getElementById('combinedLinesText').innerText = `Líneas Combinadas: ${combined}`;
         }
+
+        document.getElementById('pegarBtn').addEventListener('click', async () => {
+            try {
+                const texto = await navigator.clipboard.readText();
+                if (texto) {
+                    document.getElementById('inputText').value = texto;
+                    console.log('Texto pegado: ', texto);
+                } else {
+                    alert('No se encontró texto en el portapapeles.');
+                }
+            } catch (err) {
+                alert('No se pudo acceder al portapapeles. Asegúrate de dar permiso al navegador y que estés usando HTTPS.');
+                console.error('Error al pegar el texto: ', err);
+            }
+        });
     </script>
 </body>
 </html>
+
 
