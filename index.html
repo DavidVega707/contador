@@ -1,5 +1,260 @@
-<html>
-        <p>&copy; 2025 - Herramienta de Nada alv me gusta el pan</p>
-</html>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Formateador de Texto Avanzado</title>
+<style>
+body {
+font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+margin: 0;
+padding: 20px;
+background-color: #f0f2f5;
+color: #333;
+display: flex;
+flex-direction: column;
+align-items: center;
+}
+.container {
+background-color: #fff;
+padding: 30px;
+border-radius: 10px;
+box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+width: 90%;
+max-width: 780px;
+}
+h1 {
+color: #007bff;
+text-align: center;
+margin-bottom: 30px;
+font-size: 2em;
+}
+textarea, input[type="number"] {
+width: calc(100% - 22px);
+padding: 10px;
+border: 1px solid #ccc;
+border-radius: 5px;
+margin-bottom: 15px;
+font-size: 1em;
+box-sizing: border-box;
+}
+.controls {
+display: flex;
+align-items: center;
+gap: 15px;
+margin-bottom: 20px;
+}
+.controls label {
+font-size: 0.95em;
+}
+.buttons {
+display: flex;
+            flex-wrap: wrap;
+justify-content: space-between;
+gap: 10px;
+margin-bottom: 15px;
+}
+button {
+background-color: #007bff;
+color: white;
+padding: 12px 25px;
+border: none;
+border-radius: 5px;
+cursor: pointer;
+font-size: 1em;
+transition: background-color 0.3s ease;
+flex: 1;
+            min-width: 150px;
+}
+button:hover {
+background-color: #0056b3;
+}
+.counts {
+display: flex;
+justify-content: space-between;
+font-weight: bold;
+margin-bottom: 20px;
+}
+.output-container {
+border: 1px solid #e0e0e0;
+background-color: #f9f9f9;
+padding: 20px;
+border-radius: 5px;
+min-height: 200px;
+white-space: pre;
+font-family: 'Courier New', Courier, monospace;
+font-size: 0.95em;
+line-height: 1.6;
+overflow-x: auto;
+}
+.line {
+display: flex;
+align-items: flex-start;
+}
+.line-number {
+min-width: 40px;
+text-align: right;
+padding-right: 10px;
+color: #888;
+user-select: none;
+font-weight: bold;
+}
+.line-text {
+text-align: justify;
+            word-break: break-all;
+            word-break: break-word;
+flex-grow: 1;
+}
+.footer {
+text-align: center;
+margin-top: 30px;
+font-size: 0.9em;
+color: #777;
+}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>Estandarizador de Texto Avanzado</h1>
+        <textarea id="inputText" placeholder="Introduce tu texto aquí..."></textarea>
+        <textarea id="inputText" placeholder="Ingresar texto o pegar del portapapeles..."></textarea>
+<div class="controls">
+<label for="maxChars">Caracteres por línea:</label>
+<input type="number" id="maxChars" value="31" min="1">
+<label><input type="checkbox" id="countShort" checked> Contar líneas cortas como adicionales</label>
+</div>
+<div class="buttons">
+<button onclick="formatText()">Formatear Texto</button>
+<button onclick="calculateAdditional()">Calcular Líneas Adicionales</button>
+            <button id="pegarBtn">Pegar del Portapapeles</button>
+</div>
+<div class="counts">
+<span id="totalLinesText">Líneas Totales: 0</span>
+<span id="additionalLinesText">Líneas Adicionales: 0</span>
+<span id="combinedLinesText">Líneas Combinadas: 0</span>
+</div>
+<h2>Texto Formateado:</h2>
+<div id="outputText" class="output-container"></div>
+</div>
+<div class="footer">
+<p>&copy; 2025 - Herramienta de Formateo de Texto</p>
+</div>
+<script>
+const DEFAULT_MAX = parseInt(document.getElementById('maxChars').value, 10) || 31;
+let additionalChars = [];
 
+function formatText() {
+const inputText = document.getElementById('inputText').value;
+const outputDiv = document.getElementById('outputText');
+const maxLineLength = parseInt(document.getElementById('maxChars').value, 10) || DEFAULT_MAX;
+const countShort = document.getElementById('countShort').checked;
+outputDiv.innerHTML = '';
+additionalChars = [];
+
+if (!inputText.trim()) {
+outputDiv.innerHTML = '<p style="color: #777; text-align: center;">Por favor, ingresa algún texto para formatear.</p>';
+updateCounts(0, 0);
+return;
+}
+
+const paragraphs = inputText.split('\n');
+let lineNumber = 1;
+const minToCount = Math.floor(maxLineLength / 2);
+
+function processAndAppend(lineText) {
+const trimmed = lineText.trim();
+if (trimmed.length > 0) {
+const isShort = trimmed.length < minToCount;
+if (countShort && isShort) {
+additionalChars.push(trimmed.length);
+appendLine(lineText, '');
+} else {
+appendLine(lineText, lineNumber);
+lineNumber++;
+}
+} else {
+appendLine(lineText, '');
+}
+}
+
+paragraphs.forEach(paragraph => {
+if (paragraph.trim() === '') {
+appendLine('', '');
+return;
+}
+let current = '';
+const words = paragraph.split(/(\s+)/).filter(w => w.length > 0);
+words.forEach(word => {
+if (current.length + word.length <= maxLineLength) {
+current += word;
+} else {
+if (current) processAndAppend(current);
+current = '';
+let temp = word;
+while (temp.length > 0) {
+if (temp.length <= maxLineLength) {
+current = temp;
+temp = '';
+} else {
+let part = temp.trim().length === 0
+? temp.substring(0, maxLineLength)
+: temp.substring(0, maxLineLength - 1) + '-';
+processAndAppend(part);
+temp = temp.substring(part.endsWith('-') ? maxLineLength - 1 : maxLineLength);
+}
+}
+}
+});
+if (current) processAndAppend(current);
+});
+
+const counted = lineNumber - 1;
+const totalChars = additionalChars.reduce((sum, len) => sum + len, 0);
+const additionalLines = Math.ceil(totalChars / maxLineLength);
+updateCounts(counted, additionalLines);
+}
+
+function appendLine(text, num) {
+const container = document.getElementById('outputText');
+const div = document.createElement('div'); div.className = 'line';
+const numSpan = document.createElement('span'); numSpan.className = 'line-number';
+numSpan.textContent = typeof num === 'number' ? num + '.' : '';
+const textSpan = document.createElement('span'); textSpan.className = 'line-text';
+textSpan.textContent = text.trimEnd();
+div.appendChild(numSpan);
+div.appendChild(textSpan);
+container.appendChild(div);
+}
+
+function calculateAdditional() {
+const max = parseInt(document.getElementById('maxChars').value, 10) || DEFAULT_MAX;
+const totalChars = additionalChars.reduce((sum, len) => sum + len, 0);
+const lines = Math.ceil(totalChars / max);
+alert(`Total de líneas adicionales: ${lines}`);
+}
+
+function updateCounts(counted, additional) {
+const combined = counted + additional;
+document.getElementById('totalLinesText').innerText = `Líneas Totales: ${counted}`;
+document.getElementById('additionalLinesText').innerText = `Líneas Adicionales: ${additional}`;
+document.getElementById('combinedLinesText').innerText = `Líneas Combinadas: ${combined}`;
+}
+
+        document.getElementById('pegarBtn').addEventListener('click', async () => {
+            try {
+                const texto = await navigator.clipboard.readText();
+                if (texto) {
+                    document.getElementById('inputText').value = texto;
+                    console.log('Texto pegado: ', texto);
+                } else {
+                    alert('No se encontró texto en el portapapeles.');
+                }
+            } catch (err) {
+                alert('No se pudo acceder al portapapeles. Asegúrate de dar permiso al navegador y que estés usando HTTPS.');
+                console.error('Error al pegar el texto: ', err);
+            }
+        });
+</script>
+</body>
+</html>
 
